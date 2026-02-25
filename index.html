@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Madhav Glas - Estimate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen flex items-center justify-center py-8">
+
+<div class="max-w-6xl w-full mx-auto bg-white shadow-2xl p-8 rounded-2xl border border-slate-200" id="estimate">
+
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b pb-4 gap-4">
+        <div class="flex items-center gap-4">
+            <div class="h-20 w-20 bg-[#0f4c81] rounded-md flex items-center justify-center overflow-hidden shadow">
+                <img src="./m2.png" id="logoPreview" class="h-full w-full object-cover" onerror="this.src='https://via.placeholder.com/80?text=MGA'">
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold tracking-wide text-slate-800">Madhav Glass & Aluminium</h1>
+                <p class="text-sm text-slate-600">All Type of Glass Wholesaler</p>
+            </div>
+        </div>
+
+        <div class="text-right text-sm space-y-1">
+            <p><span class="font-semibold text-slate-700">Estimate No:</span> <input id="estimateNo" type="text" class="font-medium border border-slate-300 rounded px-1 py-0.5 w-28 text-sm" placeholder="FE-1234"></p>
+            <p><span class="font-semibold text-slate-700">Date:</span> <span id="date" class="font-medium"></span></p>
+        </div>
+    </div>
+
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input id="customerName" type="text" placeholder="Customer Name" class="border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-yellow-100">
+        <input id="customerContact" type="text" placeholder="Contact Number" class="border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <input id="customerAddress" type="text" placeholder="Address" class="md:col-span-2 border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full mt-6 border text-sm rounded-lg overflow-hidden">
+            <thead class="bg-slate-900 text-white">
+                <tr>
+                    <th class="border p-2">No</th>
+                    <th class="border p-2">Description</th>
+                    <th class="border p-2">Height</th>
+                    <th class="border p-2">Width</th>
+                    <th class="border p-2">MM</th>
+                    <th class="border p-2">Nos</th>
+                    <th class="border p-2">Sq.ft</th>
+                    <th class="border p-2">Rate</th>
+                    <th class="border p-2">Amount</th>
+                    <th class="border p-2">Action</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="mt-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <button onclick="addRow()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-md text-sm font-semibold shadow">
+            + Add Item
+        </button>
+
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+            <label class="flex items-center gap-2">
+                <input id="applyGst" type="checkbox" class="h-4 w-4 rounded border-slate-400">
+                <span class="font-medium text-slate-700">Apply GST</span>
+            </label>
+            <select id="gstRate" class="border border-slate-300 rounded-md px-2 py-1 text-sm">
+                <option value="18">18% GST</option>
+                <option value="12">12% GST</option>
+                <option value="5">5% GST</option>
+            </select>
+            <span class="text-slate-600">GST Amount: ₹ <span id="gstAmount">0.00</span></span>
+        </div>
+    </div>
+
+    <div class="mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-t pt-6">
+        <div class="text-sm text-slate-600 space-y-1">
+            <p>Subtotal: ₹ <span id="subTotal">0.00</span></p>
+            <p class="text-xl font-bold text-slate-900">Grand Total: ₹ <span id="grandTotal">0</span></p>
+        </div>
+
+        <button onclick="downloadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-md text-sm font-bold shadow-lg transition-all active:scale-95">
+            Download PDF Estimate
+        </button>
+    </div>
+
+</div>
+
+<script>
+let count = 1;
+
+// Initialize
+    const estInput = document.getElementById("estimateNo");
+    if (!estInput.value) {
+        estInput.value = "FE-" + Math.floor(1000 + Math.random() * 9000);
+    }
+    // set current date on load
+    document.getElementById("date").innerText = new Date().toLocaleDateString("en-IN");
+
+// Add initial row
+window.onload = () => addRow();
+
+function addRow() {
+    const table = document.getElementById("tableBody");
+    const row = document.createElement("tr");
+    row.innerHTML = `
+        <td class="border p-2 text-center row-index">${count}</td>
+        <td class="border p-2"><input type="text" class="w-full desc border-none focus:ring-0"></td>
+        <td class="border p-2"><input type="text" class="w-full h border-none focus:ring-0" placeholder="e.g. 42 1/2"></td>
+        <td class="border p-2"><input type="text" class="w-full w border-none focus:ring-0" placeholder="e.g. 34 3/4"></td>
+        <td class="border p-2">
+            <select class="w-full mm border border-slate-200 rounded px-1 py-1 text-xs">
+                <option value="3">3mm</option>
+                <option value="3.5">3.5mm</option>
+                <option value="4">4mm</option>
+                <option value="5">5mm</option>
+                <option value="8">8mm</option>
+                <option value="12">12mm</option>
+                <option value="12T">12mm Tuffon</option>
+            </select>
+        </td>
+        <td class="border p-2"><input type="number" class="w-full n border-none focus:ring-0"></td>
+        <td class="border p-2 text-center sq font-medium">0</td>
+        <td class="border p-2"><input type="number" class="w-full r border-none focus:ring-0"></td>
+        <td class="border p-2 text-center amt font-bold">0</td>
+        <td class="border p-2 text-center">
+            <button type="button" class="text-xs px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200" onclick="removeRow(this)">Delete</button>
+        </td>
+    `;
+    table.appendChild(row);
+    count++;
+    row.querySelectorAll("input, select").forEach(el => el.addEventListener("input", calculate));
+    renumberRows();
+}
+
+function removeRow(btn) {
+    btn.closest("tr").remove();
+    renumberRows();
+    calculate();
+}
+
+function renumberRows() {
+    document.querySelectorAll("#tableBody tr").forEach((row, i) => {
+        row.querySelector(".row-index").textContent = i + 1;
+    });
+}
+
+function parseMeasurement(input) {
+    if (!input) return 0;
+    let str = input.toString().trim();
+    if (str.includes(" ")) {
+        const parts = str.split(" ");
+        let whole = parseFloat(parts[0]) || 0;
+        let frac = 0;
+        if (parts[1] && parts[1].includes("/")) {
+            const f = parts[1].split("/");
+            frac = (parseFloat(f[0]) / parseFloat(f[1])) || 0;
+        }
+        return whole + frac;
+    } else if (str.includes("/")) {
+        const f = str.split("/");
+        return (parseFloat(f[0]) / parseFloat(f[1])) || 0;
+    }
+    return parseFloat(str) || 0;
+}
+
+function roundUpToMultipleOfThree(value) {
+    return value <= 0 ? 0 : Math.ceil(value / 3) * 3;
+}
+
+function calculate() {
+    let subTotal = 0;
+    document.querySelectorAll("#tableBody tr").forEach(row => {
+        const h = roundUpToMultipleOfThree(parseMeasurement(row.querySelector(".h").value));
+        const w = roundUpToMultipleOfThree(parseMeasurement(row.querySelector(".w").value));
+        const n = parseFloat(row.querySelector(".n").value) || 0;
+        const r = parseFloat(row.querySelector(".r").value) || 0;
+
+        const sqft = (h * w * n) / 144;
+        const amt = sqft * r;
+
+        row.querySelector(".sq").innerText = sqft.toFixed(2);
+        row.querySelector(".amt").innerText = amt.toFixed(2);
+        subTotal += amt;
+    });
+
+    document.getElementById("subTotal").innerText = subTotal.toFixed(2);
+    const useGst = document.getElementById("applyGst").checked;
+    const gstRate = parseFloat(document.getElementById("gstRate").value);
+    const gstAmt = useGst ? (subTotal * gstRate / 100) : 0;
+    
+    document.getElementById("gstAmount").innerText = gstAmt.toFixed(2);
+    const total = subTotal + gstAmt;
+    document.getElementById("grandTotal").innerText = Math.round(total);
+}
+
+function numberToWords(num) {
+    if (num === 0) return "Zero Only";
+    const a = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+    const b = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+    
+    const format = (n) => {
+        if (n < 20) return a[n];
+        if (n < 100) return b[Math.floor(n/10)] + (n%10 !== 0 ? " " + a[n%10] : "");
+        return a[Math.floor(n/100)] + " Hundred" + (n%100 !== 0 ? " and " + format(n%100) : "");
+    };
+
+    let str = "";
+    if (num >= 10000000) { str += format(Math.floor(num/10000000)) + " Crore "; num %= 10000000; }
+    if (num >= 100000) { str += format(Math.floor(num/100000)) + " Lakh "; num %= 100000; }
+    if (num >= 1000) { str += format(Math.floor(num/1000)) + " Thousand "; num %= 1000; }
+    if (num > 0) str += format(num);
+    
+    return str.trim() + " Only";
+}
+
+async function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p", "mm", "a4");
+    
+    // Attempt to load logo with timeout
+    const loadImage = (src) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = src;
+            img.onload = () => resolve(img);
+            img.onerror = () => resolve(null);
+            setTimeout(() => resolve(null), 1000); 
+        });
+    };
+
+    const logo = await loadImage("./m2.png");
+
+    // Header Background
+    doc.setFillColor(15, 76, 129);
+    doc.rect(0, 0, 210, 45, "F");
+
+    if (logo) {
+        // make logo a bit larger for better visibility
+        doc.addImage(logo, "JPEG", 10, 8, 30, 30);
+    }
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.text("Madhav Glass ", 40, 20);
+    doc.setFontSize(10);
+    doc.text("All type of glass wholesaler | Mo: 7622938930, 7863893083", 40, 27);
+    doc.text("Shop 9, Shivaley Arcade, Modasa-Kapadvanj Road, Kapadvanj", 40, 33);
+
+    doc.setFontSize(9);
+    doc.text("EST: " + document.getElementById("estimateNo").value, 175, 15);
+    doc.text("Date: " + document.getElementById("date").innerText, 175, 20);
+
+    // Customer Info
+    let y = 55;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(11);
+    doc.text("CUSTOMER DETAILS", 10, y);
+    doc.line(10, y+1, 50, y+1);
+    
+    y += 8;
+    doc.setFontSize(10);
+    doc.text("Name: " + (document.getElementById("customerName").value || "N/A"), 10, y);
+    doc.text("Contact: " + (document.getElementById("customerContact").value || "N/A"), 120, y);
+    y += 6;
+    doc.text("Address: " + (document.getElementById("customerAddress").value || "N/A"), 10, y);
+
+    // Table
+    const tableData = [];
+    document.querySelectorAll("#tableBody tr").forEach((row, i) => {
+        tableData.push([
+            i + 1,
+            row.querySelector(".desc").value,
+            row.querySelector(".h").value,
+            row.querySelector(".w").value,
+            row.querySelector(".mm").value,
+            row.querySelector(".n").value,
+            row.querySelector(".sq").innerText,
+            row.querySelector(".r").value,
+            row.querySelector(".amt").innerText
+        ]);
+    });
+
+    doc.autoTable({
+        startY: y + 10,
+        head: [['No', 'Description', 'H', 'W', 'MM', 'Nos', 'Sq.ft', 'Rate', 'Amount']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: { fillColor: [15, 76, 129] },
+        styles: { fontSize: 8 }
+    });
+
+    // Totals
+    let finalY = doc.lastAutoTable.finalY + 10;
+    const sub = document.getElementById("subTotal").innerText;
+    const gst = document.getElementById("gstAmount").innerText;
+    const grand = document.getElementById("grandTotal").innerText;
+
+    doc.setFontSize(10);
+    doc.text("Subtotal: Rs. " + sub, 140, finalY);
+    if (parseFloat(gst) > 0) {
+        finalY += 6;
+        doc.text("GST: Rs. " + gst, 140, finalY);
+    }
+    
+    finalY += 8;
+    doc.setFillColor(15, 76, 129);
+    doc.rect(135, finalY - 5, 65, 10, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(12);
+    doc.text("TOTAL: Rs. " + grand, 140, finalY + 2);
+
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9);
+    doc.text("Amount in Words: " + numberToWords(parseInt(grand)), 10, finalY + 15);
+
+    doc.save(`Estimate_${document.getElementById("customerName").value || 'MGA'}.pdf`);
+}
+</script>
+
+</body>
+</html>
