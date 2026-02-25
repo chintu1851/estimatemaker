@@ -36,6 +36,25 @@
         <input id="customerAddress" type="text" placeholder="Address" class="md:col-span-2 w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
     </div>
 
+    <!-- list of common descriptions for autocomplete -->
+    <datalist id="descList">
+        <option value="SUNGLASS">
+        <option value="CLEAR">
+        <option value="BLACK ONE WAY">
+        <option value="BROWN ONE WAY">
+        <option value="BLUE ONE WAY">
+        <option value="WHITE CROWN">
+        <option value="BLACK CROWN">
+        <option value="KARAKACHI (GREY VICTORY)">
+        <option value="WHITE FLUTED">
+        <option value="BLACK FLUTED">
+        <option value="BAJARI (PINHEAD)">
+        <option value="GREY GINZA">
+        <option value="FROSTED">
+        <option value="WHITE LINNING">
+        <option value="BLACK PU">
+    </datalist>
+
     <div class="overflow-x-auto">
         <table class="w-full mt-6 border text-sm rounded-lg overflow-hidden">
             <thead class="bg-slate-900 text-white">
@@ -107,7 +126,7 @@ function addRow() {
     const row = document.createElement("tr");
     row.innerHTML = `
         <td class="border p-2 text-center row-index">${count}</td>
-        <td class="border p-2"><input type="text" class="w-full desc border-none focus:ring-0"></td>
+        <td class="border p-2"><input type="text" list="descList" class="w-full desc border-none focus:ring-0"></td>
         <td class="border p-2"><input type="text" class="w-full h border-none focus:ring-0" placeholder="e.g. 42 1/2"></td>
         <td class="border p-2"><input type="text" class="w-full w border-none focus:ring-0" placeholder="e.g. 34 3/4"></td>
         <td class="border p-2">
@@ -233,40 +252,55 @@ async function downloadPDF() {
 
     const logo = await loadImage("./m2.png");
 
-    // Header Background
+    // Header background and logo positioning
     doc.setFillColor(15, 76, 129);
-    doc.rect(0, 0, 210, 45, "F");
+    doc.rect(0, 0, 210, 50, "F");
 
     if (logo) {
-        // make logo a bit larger for better visibility
-        doc.addImage(logo, "JPEG", 10, 8, 30, 30);
+        // larger logo centred vertically within header
+        doc.addImage(logo, "JPEG", 3, 5, 45, 45);
     }
 
     doc.setTextColor(255, 255, 255);
+    // company name
     doc.setFontSize(22);
-    doc.text("Madhav Glass ", 40, 20);
+    doc.text("Madhav Glass", 50, 20);
+    // subsequent lines
     doc.setFontSize(10);
-    doc.text("All type of glass wholesaler | Mo: 7622938930, 7863893083", 40, 27);
-    doc.text("Shop 9, Shivalay Arcade, Modasa-Kapadvanj Road, Kapadvanj", 40, 33);
-
+    doc.text("All type of glass wholesaler", 50, 28);
+    doc.text("Shop 9, Shivalay Arcade, Modasa-Kapadvanj Road,", 50, 34);
+    doc.text("Kapadvanj-387620 - Gujarat", 50, 40);
+    doc.text("Mo: 7622938930, 7863893083", 50, 46);
     doc.setFontSize(9);
-    doc.text("EST: " + document.getElementById("estimateNo").value, 175, 15);
-    doc.text("Date: " + document.getElementById("date").innerText, 175, 20);
+    doc.text("EST: " + document.getElementById("estimateNo").value, 175, 18);
+    doc.text("Date: " + document.getElementById("date").innerText, 175, 24);
 
     // Customer Info
-    let y = 55;
+    let y = 60;
     doc.setTextColor(0, 0, 0);
-    doc.setFontSize(11);
+    doc.setFontSize(14);
     doc.text("CUSTOMER DETAILS", 10, y);
-    doc.line(10, y+1, 50, y+1);
+    doc.line(10, y+1, 60, y+1);
     
     y += 8;
-    doc.setFontSize(10);
-    doc.text("Name: " + (document.getElementById("customerName").value || "N/A"), 10, y);
-    doc.text("Contact: " + (document.getElementById("customerContact").value || "N/A"), 120, y);
-    y += 6;
-    doc.text("Address: " + (document.getElementById("customerAddress").value || "N/A"), 10, y);
+    doc.setFontSize(12);
+    // name label/value
+    doc.setFont(undefined,'bold');
+    doc.text("Name:", 10, y);
+    doc.setFont(undefined,'normal');
+    doc.text(document.getElementById("customerName").value || "N/A", 30, y, {maxWidth: 120});
 
+    y += 6;
+    doc.setFont(undefined,'bold');
+    doc.text("Contact:", 10, y);
+    doc.setFont(undefined,'normal');
+    doc.text(document.getElementById("customerContact").value || "N/A", 30, y);
+
+    y += 6;
+    doc.setFont(undefined,'bold');
+    doc.text("Address:", 10, y);
+    doc.setFont(undefined,'normal');
+    doc.text(document.getElementById("customerAddress").value || "N/A", 30, y, {maxWidth: 140});
     // Table
     const tableData = [];
     document.querySelectorAll("#tableBody tr").forEach((row, i) => {
