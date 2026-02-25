@@ -31,9 +31,9 @@
     </div>
 
     <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input id="customerName" type="text" placeholder="Customer Name" class="border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-yellow-100">
-        <input id="customerContact" type="text" placeholder="Contact Number" class="border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <input id="customerAddress" type="text" placeholder="Address" class="md:col-span-2 border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <input id="customerName" type="text" placeholder="Customer Name" class="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-yellow-100">
+        <input id="customerContact" type="text" placeholder="Contact Number" class="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <input id="customerAddress" type="text" placeholder="Address" class="md:col-span-2 w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
     </div>
 
     <div class="overflow-x-auto">
@@ -57,7 +57,7 @@
     </div>
 
     <div class="mt-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <button onclick="addRow()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-md text-sm font-semibold shadow">
+        <button onclick="addRow()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-md text-sm font-semibold shadow w-full md:w-auto text-center">
             + Add Item
         </button>
 
@@ -81,8 +81,8 @@
             <p class="text-xl font-bold text-slate-900">Grand Total: ₹ <span id="grandTotal">0</span></p>
         </div>
 
-        <button onclick="downloadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-md text-sm font-bold shadow-lg transition-all active:scale-95">
-            Download PDF Estimate
+        <button onclick="downloadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-md text-sm font-bold shadow-lg transition-all active:scale-95 w-full md:w-auto text-center">
+            Download PDF Bill
         </button>
     </div>
 
@@ -247,7 +247,7 @@ async function downloadPDF() {
     doc.text("Madhav Glass ", 40, 20);
     doc.setFontSize(10);
     doc.text("All type of glass wholesaler | Mo: 7622938930, 7863893083", 40, 27);
-    doc.text("Shop 9, Shivaley Arcade, Modasa-Kapadvanj Road, Kapadvanj", 40, 33);
+    doc.text("Shop 9, Shivalay Arcade, Modasa-Kapadvanj Road, Kapadvanj", 40, 33);
 
     doc.setFontSize(9);
     doc.text("EST: " + document.getElementById("estimateNo").value, 175, 15);
