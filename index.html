@@ -316,7 +316,9 @@ async function downloadPDF() {
     doc.setFontSize(9);
     doc.text("Amount in Words: " + numberToWords(parseInt(grand)), 10, finalY + 15);
 
-    doc.save(`Estimate_${document.getElementById("customerName").value || 'MGA'}.pdf`);
+    const customer = document.getElementById("customerName").value || 'MGA';
+    const estNo = document.getElementById("estimateNo").value || '';
+    doc.save(`Bill_${customer}_${estNo}.pdf`);
 }
 </script>
 
